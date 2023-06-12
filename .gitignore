@@ -1,2 +1,8 @@
 /.idea
 /data/TCG
+/data/HRI_gestures
+/openpose/bin
+/openpose/examples
+/openpose/models
+/openpose/python
+/openpose/Release
