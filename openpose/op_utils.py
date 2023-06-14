@@ -84,6 +84,7 @@ def set_params():
     :return: Parameter dictionary with default values
     '''
 
+    dir_path = os.path.dirname(os.path.realpath(__file__))
     params = dict()
     params["logging_level"] = 3
     params["output_resolution"] = "-1x-1"
@@ -97,7 +98,7 @@ def set_params():
     params["num_gpu_start"] = 0
     params["disable_blending"] = False
     # Ensure you point to the correct path where models are located
-    params["model_folder"] = "models/"
+    params["model_folder"] = dir_path + "/models/"  # THIS IS RELATIVE TO PATH OF EXECUTABLE
     return params
 
 
@@ -180,6 +181,3 @@ def get_camera_keypoints():
     stream.release()
 
     return keypoints
-
-
-print(get_camera_keypoints())

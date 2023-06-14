@@ -1,9 +1,11 @@
 import os
 import json
 import numpy as np
+from sklearn.preprocessing import normalize
+from openpose import op_utils
 
 
-def get_data(file_dir):
+def get_JAAD_data(file_dir):
     """
     Will read JSON files from the provided file directory and subdirectories and return a list of dicts
     :param file_dir: directory where to look for input JSON files
@@ -35,11 +37,12 @@ def get_data_TCG(file_dir: str) -> (np.ndarray, dict):
     return tcg_data, tcg_json
 
 
-# get_data('../data/JAAD_output_JSON')
-
 # example usage
+np.set_printoptions(suppress=True)
 tcg_d, tcg_j = get_data_TCG('../data/TCG/')
 print(len(tcg_d))
 print(tcg_j.keys())
 print(len(tcg_j['sequences']))
 print(tcg_d[0][0])
+print(normalize(tcg_d[0][0]))
+print(op_utils.get_camera_keypoints())
