@@ -75,16 +75,20 @@ def get_data_HRI(file_dir: str) -> (np.ndarray, list):
 
     return np.array(hri_dataset), np.array(hri_labels)
 
+
+def load_data_HRI(file_dir: str) -> (np.ndarray, np.ndarray):
+    '''
+    Loads the HRI_gestures dataset from the saved .npy files
+    :param file_dir: Path to the directory both files are saved
+    :return: data and labels as np.ndarray
+    '''
+    hri_data = np.load(file_dir + 'HRI_data.npy')
+    hri_labels = np.load(file_dir + 'HRI_labels.npy')
+
+    return hri_data, hri_labels
+
+
 # example usage
-data, lab = get_data_HRI('../data/HRI_gestures')
+data, lab = load_data_HRI('../data/HRI_gestures/')
 print(data.shape)
 print(lab.shape)
-"""tcg_d, tcg_j = get_data_TCG('../data/TCG/')
-print(len(tcg_d))
-print(tcg_j.keys())
-print(len(tcg_j['sequences']))
-print(tcg_d[0][0])
-print(normalize(tcg_d[0][0]))"""
-# op_utils.get_camera_stream_and_display()
-# print(keypoints)
-# print(normalize(keypoints))
