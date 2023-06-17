@@ -37,12 +37,54 @@ def get_data_TCG(file_dir: str) -> (np.ndarray, dict):
     return tcg_data, tcg_json
 
 
+def get_data_HRI(file_dir: str) -> (np.ndarray, list):
+    '''
+    Reads in the whole HRI dataset and creates a data array and their corresponding labels
+    :param file_dir: Path to root directory of HRI dataset (example: '../data/HRI_gestures')
+    :return: (data, labels) -> both as np.ndarray
+    '''
+    action_class = {'A001': 'Stop', 'A002': 'Go Right', 'A003': 'Go Left', 'A004': 'Come Here', 'A005': 'Follow me',
+                    'A006': 'Go Away', 'A007': 'Agree', 'A008': 'Disagree', 'A009': 'Go there', 'A010': 'Get Attention',
+                    'A011': 'Be Quiet', 'A012': 'Dont Know', 'A013': 'Turn Around', 'A014': 'Take This',
+                    'A015': 'Pick Up', 'A016': 'Standing Still', 'A017': 'Being Seated', 'A018': 'Walking Towards',
+                    'A019': 'Walking Away', 'A020': 'Talking on Phone'}
+    joint_dict = {'Nose': 0, 'LEye': 1, 'REye': 2, 'LEar': 3, 'REar': 4, 'LShoulder': 5, 'RShoulder': 6, 'LElbow': 7,
+                  'RElbow': 8, 'LWrist': 9, 'RWrist': 10, 'LHip': 11, 'RHip': 12, 'LKnee': 13, 'RKnee': 14,
+                  'LAnkle': 15, 'RAnkle': 16}
+    hri_dataset = []
+    hri_labels = []
+    for dirpath, dirnames, filenames in os.walk(file_dir):
+        for file in filenames:
+            with open(dirpath + '/' + file, 'r') as f:
+                content = f.readlines()
+                f.close()
+            frames = int(content[0])
+            cur_label = action_class[file[:4]]
+            next_position = 1
+            for i in range(frames):
+                joints = np.zeros((17, 5), dtype='float64')
+                joint_nr = int(content[next_position])
+                next_position += 1
+                for joint in range(joint_nr):
+                    v = content[next_position].split(' ')
+                    label = v[0]
+                    joints[joint_dict[label]] = v[1:]
+                    next_position += 1
+                hri_dataset.append(joints)
+                hri_labels.append(cur_label)
+
+    return np.array(hri_dataset), np.array(hri_labels)
+
 # example usage
-np.set_printoptions(suppress=True)
-tcg_d, tcg_j = get_data_TCG('../data/TCG/')
+data, lab = get_data_HRI('../data/HRI_gestures')
+print(data.shape)
+print(lab.shape)
+"""tcg_d, tcg_j = get_data_TCG('../data/TCG/')
 print(len(tcg_d))
 print(tcg_j.keys())
 print(len(tcg_j['sequences']))
 print(tcg_d[0][0])
-print(normalize(tcg_d[0][0]))
-print(op_utils.get_camera_keypoints())
+print(normalize(tcg_d[0][0]))"""
+# op_utils.get_camera_stream_and_display()
+# print(keypoints)
+# print(normalize(keypoints))
