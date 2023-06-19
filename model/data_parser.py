@@ -1,6 +1,14 @@
 import os
 import json
 import numpy as np
+import pandas as pd
+
+
+def convert_jaad_dict_to_df(jaad_dict):
+    data = pd.DataFrame(jaad_dict)
+    data_y = data['label']
+    data_x = data.drop(['label'])
+    return data_x, data_y
 
 
 def get_data(file_dir):
@@ -38,8 +46,8 @@ def get_data_TCG(file_dir: str) -> (np.ndarray, dict):
 # get_data('../data/JAAD_output_JSON')
 
 # example usage
-tcg_d, tcg_j = get_data_TCG('../data/TCG/')
-print(len(tcg_d))
-print(tcg_j.keys())
-print(len(tcg_j['sequences']))
-print(tcg_d[0][0])
+#tcg_d, tcg_j = get_data_TCG('../data/TCG/')
+#print(len(tcg_d))
+#print(tcg_j.keys())
+#print(len(tcg_j['sequences']))
+#print(tcg_d[0][0])
