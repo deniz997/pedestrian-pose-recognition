@@ -6,6 +6,9 @@ import argparse
 
 
 def import_op():
+    '''
+    This is a helper function to import the openpose library.
+    '''
     # Import Openpose (Windows/Ubuntu/OSX)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     try:
@@ -31,6 +34,11 @@ def import_op():
 
 
 def get_keypoints_image(img_path: str):
+    '''
+    Get the openpose keypoints of an image by the given image path
+    :param img_path: Directory path to image
+    :return: Array of 17 body keypoints
+    '''
     import_op()
 
     # Flags
@@ -73,9 +81,124 @@ def get_keypoints_image(img_path: str):
     opWrapper.emplaceAndPop(op.VectorDatum([datum]))
 
     # Display Image
-    print("Body keypoints: \n" + str(datum.poseKeypoints))
-    cv2.imshow("OpenPose 1.7.0 - Output Image", datum.cvOutputData)
-    cv2.waitKey(0)
+    # print("Body keypoints: \n" + str(datum.poseKeypoints))
+    # cv2.imshow("OpenPose 1.7.0 - Output Image", datum.cvOutputData)
+    # cv2.waitKey(0)
+    return datum.poseKeypoints
+
+
+def get_keypoints_image_from_data(img_data):
+    '''
+    Get the body keypoints from a given image file, which was opened with OpenCV (imread())
+    :param img_data: An image data file
+    :return: Array of 17 body keypoints
+    '''
+    import_op()
+
+    # Flags
+    parser = argparse.ArgumentParser()
+    args = parser.parse_known_args()
+
+    # Custom Params (refer to include/openpose/flags.hpp for more parameters)
+    params = dict()
+    params["model_folder"] = "models/"
+
+    # Add others in path?
+    for i in range(0, len(args[1])):
+        curr_item = args[1][i]
+        if i != len(args[1]) - 1:
+            next_item = args[1][i + 1]
+        else:
+            next_item = "1"
+        if "--" in curr_item and "--" in next_item:
+            key = curr_item.replace('-', '')
+            if key not in params:  params[key] = "1"
+        elif "--" in curr_item and "--" not in next_item:
+            key = curr_item.replace('-', '')
+            if key not in params: params[key] = next_item
+
+    # Starting OpenPose
+    opWrapper = op.WrapperPython()
+    opWrapper.configure(params)
+    opWrapper.start()
+
+    # Process Image
+    datum = op.Datum()
+    datum.cvInputData = img_data
+    opWrapper.emplaceAndPop(op.VectorDatum([datum]))
+
+    return datum.poseKeypoints
+
+
+def get_keypoints_from_image_sequence(sequence, output_images=False):
+    '''
+    Calculate the body keypoints from a sequence of image files
+    :param sequence: Array of images, read with the OpenCV library (.imread())
+    :param output_images: Set to true if the calculated output images should be returned as well
+    :return: List of arrays of 17 body keypoints - if output_images is true: (keypoints, new_images)
+    '''
+    import_op()
+    params = set_params()
+
+    img_keypoints = []
+    img_outputs = []
+
+    # Constructing OpenPose object allocates GPU memory
+    opWrapper = op.WrapperPython()
+    opWrapper.configure(params)
+    opWrapper.start()
+
+    for img in sequence:
+        datum = op.Datum()
+        datum.cvInputData = img
+        opWrapper.emplaceAndPop(op.VectorDatum([datum]))
+        img_keypoints.append(datum.poseKeypoints)
+        img_outputs.append(datum.cvOutputData)
+    if output_images:
+        return img_keypoints, img_outputs
+    else:
+        return img_keypoints
+
+
+def get_keypoints_from_video(video_path: str, save_video=False, output_file='../data/sample_video.mp4'):
+    '''
+    Get an array of body keypoints of the video given by its path
+    :param video_path: Directory path to video
+    :param save_video: Set to true if you want to save an output video as .mp4 file
+    :return: List of arrays with body keypoints for each frame
+    '''
+    import_op()
+    params = set_params()
+
+    opWrapper = op.WrapperPython()
+    opWrapper.configure(params)
+    opWrapper.start()
+
+    capture = cv2.VideoCapture(video_path)
+    i_frame = 0
+    img_data = []
+    video_frames = []
+    while True:
+        success, frame = capture.read()
+
+        if success:
+            datum = op.Datum()
+            datum.cvInputData = frame
+            opWrapper.emplaceAndPop(op.VectorDatum([datum]))
+            img_data.append(datum.poseKeypoints)
+            if save_video:
+                video_frames.append(datum.cvOutputData)
+        else:
+            break
+        i_frame += 1
+    if save_video:
+        height, width, _ = video_frames[0].shape
+        out = cv2.VideoWriter(output_file, cv2.VideoWriter_fourcc(*'mp4v'), 15, (width, height))
+
+        for i in range(len(video_frames)):
+            out.write(video_frames[i])
+        out.release()
+    return img_data
 
 
 def set_params():
