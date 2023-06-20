@@ -1,4 +1,5 @@
 import csv
+import math
 import os
 import json
 import re
@@ -59,17 +60,37 @@ def get_pedestrian_labels_from_frame(pedestrian: dict, frame_number: int):
     raise Exception("Frame number not found")
 
 
-def merge_jaad_with_labels(filename: str, path_labels: str, data: dict):
-    frame_number = infer_frame_number(filename)
-    annotations = xml_to_dict(read_xml_file(path_labels))
-    pedestrians: dict = get_pedestrians_from_dict(annotations)
-
+def check_if_in_box(data, box):
+    xbr = float(box['xbr'])
+    xtl = float(box['xtl'])
+    ybr = float(box['ybr'])
+    ytl = float(box['ytl'])
+    person_list = []
     for person in data['people']:
-        person_id = person["person_id"]
-        pedestrian = list(pedestrians.values())[0]  # TODO: change if person_id is not -1
-        labels = get_pedestrian_labels_from_frame(pedestrian, frame_number)
-        person['labels'] = labels
-    return data
+        keypoints = person['pose_keypoints_2d']
+        i = 0
+        j = 1
+        number_of_hits = 0
+        for z in range(len(keypoints)):
+            if i == len(keypoints):
+                break
+            xp = keypoints[i]
+            yp = keypoints[j]
+            if xtl <= xp and xp <= xbr and ytl <=yp and yp <= ybr :
+                number_of_hits +=1
+            i += 3
+            j += 3
+        person_list.append(number_of_hits)
+    max_value = max(person_list)
+    index = person_list.index(max_value)
+    found_pedestrian = data['people'][index]
+    return found_pedestrian
+
+def merge_jaad_with_labels(data: dict, box):
+    person_in_box = check_if_in_box(data, box)
+    person_in_box['attributes'] = box['attribute']
+    return person_in_box
+
 
 
 def save_data(update_data: dict, output_folder: str, filename: str):
@@ -106,25 +127,30 @@ if __name__ == "__main__":
                                 'video_0061', 'video_0346', 'video_0014', 'video_0181', 'video_0196']
 
 
-    file_json_list = open("C:/Users/max00/Documents/PoseRecognition/pedestrian-pose-recognition/model/action_recognition/scripts/json_list.csv", "r")
-    file_list = list(csv.reader(file_json_list))[0]
-    file_json_list.close()
 
     video_files = [f + ".mp4" for f in filenames_without_ending]
     annotation_files = [f + ".xml" for f in filenames_without_ending]
 
     dir_jaad = Path("C:/Users/max00/Documents/PoseRecognition/pedestrian-pose-recognition/data/JAAD_output_JSON")
     path_labels = Path("C:/Users/max00/Downloads/JAAD-JAAD_2.0/JAAD-JAAD_2.0/annotations/")
-    output_folder = Path("C:/Users/max00/OneDrive/Dokumente/Uni/SS23/PoseRecognition/pedestrian-pose-recognition/data/JAAD_JSON_Labels/")
+    output_folder = Path("C:/Users/max00/Documents/PoseRecognition/pedestrian-pose-recognition/data/JAAD_JSON_Labels/")
+    pedestrian_new = []
     for video_name in filenames_without_ending:
-        json_path = dir_jaad / video_name
         annotation_file = path_labels / (video_name + ".xml")
-
-        for file_json in file_list:
-            video_name = file_json.replace("_", " ", 1)
-            video_name = video_name.split("_")[0]
-            video_name = video_name.replace(" ", "_")
-            f = open(dir_jaad / video_name / file_json)
+        annotations = xml_to_dict(read_xml_file(annotation_file))
+        pedestrian = get_pedestrians_from_dict(annotations)
+        pedestrian = list(pedestrian.values())[0]
+        for box in pedestrian['box']:
+            frame = box['frame']
+            xbr = box['xbr']
+            xtl = box['xtl']
+            ybr = box['ybr']
+            ytl = box['ytl']
+            json_file = video_name + "_" + frame.zfill(12) + "_" + 'keypoints' + ".json"
+            f = open(dir_jaad / video_name / json_file)
             data = json.load(f)
-            update_data = merge_jaad_with_labels(file_json, annotation_file, data)
-            save_data(update_data, (output_folder / video_name), file_json)
+            if len(data['people']) == 0:
+                continue
+            p_new = merge_jaad_with_labels(data, box)
+            pedestrian_new.append(p_new)
+            save_data(p_new, output_folder / video_name, json_file)
