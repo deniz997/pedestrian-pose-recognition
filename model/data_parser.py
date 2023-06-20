@@ -36,7 +36,6 @@ def get_data_TCG(file_dir: str) -> (np.ndarray, dict):
 
     return tcg_data, tcg_json
 
-
 def get_data_HRI(file_dir: str) -> (np.ndarray, list):
     '''
     Reads in the whole HRI dataset and creates a data array and their corresponding labels
@@ -59,6 +58,8 @@ def get_data_HRI(file_dir: str) -> (np.ndarray, list):
                 content = f.readlines()
                 f.close()
             frames = int(content[0])
+            file_data = []
+            file_label = []
             cur_label = action_class[file[:4]]
             next_position = 1
             for i in range(frames):
@@ -70,10 +71,12 @@ def get_data_HRI(file_dir: str) -> (np.ndarray, list):
                     label = v[0]
                     joints[joint_dict[label]] = v[1:]
                     next_position += 1
-                hri_dataset.append(joints)
-                hri_labels.append(cur_label)
+                file_data.append(joints)
+                file_label.append(cur_label)
+            hri_dataset.append(np.array(file_data))
+            hri_labels.append(cur_label)
 
-    return np.array(hri_dataset), np.array(hri_labels)
+    return hri_dataset, hri_labels
 
 
 def load_data_HRI(file_dir: str) -> (np.ndarray, np.ndarray):
@@ -87,8 +90,7 @@ def load_data_HRI(file_dir: str) -> (np.ndarray, np.ndarray):
 
     return hri_data, hri_labels
 
-
 # example usage
-data, lab = load_data_HRI('../data/HRI_gestures/')
-print(data.shape)
-print(lab.shape)
+#data, lab = load_data_HRI('data/HRI_gestures/')
+#print(data.shape)
+#print(lab.shape)
