@@ -86,9 +86,17 @@ def check_if_in_box(data, box):
     found_pedestrian = data['people'][index]
     return found_pedestrian
 
+
+def attributes_to_dict(person_in_box, attribute_list):
+    attribute_dict = {}
+    for attribute in attribute_list:
+        person_in_box[attribute['name']] = attribute['attribute']
+    return attribute_dict
+
+
 def merge_jaad_with_labels(data: dict, box):
     person_in_box = check_if_in_box(data, box)
-    person_in_box['attributes'] = box['attribute']
+    person_in_box['attributes'] = attributes_to_dict(person_in_box, box['attribute'])
     return person_in_box
 
 
