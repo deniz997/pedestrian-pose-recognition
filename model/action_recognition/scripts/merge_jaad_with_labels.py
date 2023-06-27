@@ -143,22 +143,18 @@ if __name__ == "__main__":
     path_labels = Path("C:/Users/max00/Downloads/JAAD-JAAD_2.0/JAAD-JAAD_2.0/annotations/")
     output_folder = Path("C:/Users/max00/Documents/PoseRecognition/pedestrian-pose-recognition/data/JAAD_JSON_Labels/")
     pedestrian_new = []
-    for video_name in filenames_without_ending:
+    for video_name in os.listdir(dir_jaad):
         annotation_file = path_labels / (video_name + ".xml")
         annotations = xml_to_dict(read_xml_file(annotation_file))
-        pedestrian = get_pedestrians_from_dict(annotations)
-        pedestrian = list(pedestrian.values())[0]
-        for box in pedestrian['box']:
-            frame = box['frame']
-            xbr = box['xbr']
-            xtl = box['xtl']
-            ybr = box['ybr']
-            ytl = box['ytl']
-            json_file = video_name + "_" + frame.zfill(12) + "_" + 'keypoints' + ".json"
-            f = open(dir_jaad / video_name / json_file)
-            data = json.load(f)
-            if len(data['people']) == 0:
-                continue
-            p_new = merge_jaad_with_labels(data, box)
-            pedestrian_new.append(p_new)
-            save_data(p_new, output_folder / video_name, json_file)
+        pedestrians = get_pedestrians_from_dict(annotations)
+        for pedestrian in pedestrians.values():
+            for box in pedestrian['box']:
+                frame = box['frame']
+                json_file = video_name + "_" + frame.zfill(12) + "_" + 'keypoints' + ".json"
+                f = open(dir_jaad / video_name / json_file)
+                data = json.load(f)
+                if len(data['people']) == 0:
+                    continue
+                p_new = merge_jaad_with_labels(data, box)
+                pedestrian_new.append(p_new)
+                save_data(p_new, output_folder / video_name, json_file)
