@@ -1,3 +1,4 @@
+import numpy as np
 import sklearn.metrics as metrics
 from scipy import sparse
 from sklearn.ensemble import RandomForestClassifier
@@ -22,29 +23,32 @@ if __name__ == '__main__':
     sp_X_test = sparse.csr_matrix(X_test.values)
     sp_Y_test = sparse.csr_matrix(Y_test.values)
 
-    classifier = ClassifierChain(
-        classifier=RandomForestClassifier(n_estimators=100),
-        require_dense=[False, True]
-    )
+    from tensorflow import keras
+    from keras.models import Sequential
+    from keras.layers import LSTM, Dense,Input
 
-    # train
-    classifier.fit(sp_X_train, sp_Y_train)
-    # predict
-    predictions = classifier.predict(sp_X_test)
+    # define model
+    print(X.shape)
+    features, coordinate_values = X_train.shape
+    model = Sequential()
+    model.add(LSTM(64, input_shape=(coordinate_values,1)))
+    model.add(Dense(128, activation='relu'))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dense(32, activation='relu'))
+    model.add(Dense(5))  # output layer，units is the unit number for output
 
-    print(metrics.hamming_loss(sp_Y_test, predictions))
-    print(metrics.accuracy_score(sp_Y_test, predictions))
+    # compile model
+    optimizer = keras.optimizers.Adam(learning_rate=0.00001)
+    model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['accuracy'])
 
+    # train model
+    model.fit(X_train, Y_train, epochs=11, batch_size=32)
 
-    clf = BinaryRelevance(
-        classifier=SVC(),
-        require_dense=[False, True]
-    )
+    # prediction
+    predictions = model.predict(X_test)
 
-    clf.fit(sp_X_train, sp_Y_train)
-    prediction = clf.predict(sp_X_test)
+    print("Evaluate on test data")
+    results = model.evaluate(X_test, Y_test, batch_size=128)
+    print(dict(zip(model.metrics_names, results)))
 
-
-    print(metrics.hamming_loss(sp_Y_test, prediction))
-    print(metrics.accuracy_score(sp_Y_test, prediction))
-
+    round_pred = np.round(predictions).astype(int)
