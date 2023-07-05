@@ -7,13 +7,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from skmultilearn.problem_transform import BinaryRelevance, ClassifierChain
 
-from model.data_parser import convert_jaad_dict_to_df, get_data
+from model.data_parser import convert_jaad_dict_to_df, get_JAAD_data
 
 if __name__ == '__main__':
 
     data_dir = "C:/Users/max00/Documents/PoseRecognition/pedestrian-pose-recognition/data/JAAD_JSON_Labels/"
 
-    X, Y = convert_jaad_dict_to_df(get_data(data_dir))
+    X, Y = convert_jaad_dict_to_df(get_JAAD_data(data_dir))
 
     # SVM Classifier
 
