@@ -1,5 +1,7 @@
 /.idea
 /data/TCG
+/data/JAAD_output_JSON/*
+/data/JAAD_JSON_Labels/*
 /data/HRI_gestures
 /openpose/bin
 /openpose/examples
