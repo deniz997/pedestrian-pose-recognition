@@ -1,13 +1,11 @@
-import os
 import json
-import numpy as np
-import sklearn.preprocessing
-from sklearn.preprocessing import normalize
-from openpose import op_utils
+import os
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from matplotlib import rc
 from matplotlib.animation import FuncAnimation
-import pandas as pd
 
 
 def keypoints_to_dict(jaad_dict):
@@ -37,8 +35,8 @@ def map_text_to_scalar(label_type, value):
                    'action': {'standing': 0, 'walking': 1},
                    'nod': {'__undefined__': 0, 'nodding': 1},
                    'look': {'not-looking': 0, 'looking': 1},
-                   'hand_gesture': {'__undefined__': 0, 'greet': 1, 'yield': 2,
-                                    'rightofway': 3, 'other': 4},
+                   'hand_gesture': {'__undefined__': 0, 'greet': 1, 'yield': 1,
+                                    'rightofway': 1, 'other': 1},
                    'reaction': {'__undefined__': 0, 'clear_path': 1, 'speed_up': 2,
                                 'slow_down': 3},
                    'cross': {'not-crossing': 0, 'crossing': 1, 'irrelevant': -1},
@@ -66,7 +64,7 @@ def convert_jaad_dict_to_df(jaad_dict):
         updated_list.append(j_dict)
     data_dict = keypoints_to_dict(updated_list)
     data = pd.DataFrame(data_dict)
-    data_y = data[['look', 'action', 'cross', 'hand_gesture', 'nod']]
+    data_y = data[['look', 'action', 'hand_gesture', 'nod']]
     data_x = data.drop(columns=['look', 'action', 'cross', 'hand_gesture', 'nod'])
     df_norm = (data_x - data_x.mean()) / (data_x.max() - data_x.min())
     return df_norm.astype('float'), data_y.astype('float')
@@ -241,9 +239,9 @@ def show_skeleton(skeleton, reverse=True, as_video=False, save_with_name="", fra
 # example usage
 # data = np.load('../data/hri_keypoints_robert.npy', allow_pickle=True)
 # show_skeleton(data[0][0][None])
-
-hri_labels = ['Come Here', 'Follow Me', 'Follow Me', 'Follow Me', 'Follow Me',
-              'Get Attention', 'Get Attention', 'Get Attention', 'Go Left', 'Go Left',
-              'Go Right', 'Go Right', 'Standing Still', 'Standing Still', 'Standing Still',
-              'Stop', 'Stop', 'Stop', 'Stop', 'Stop']
-np.save('../data/hri_labels_robert.npy', np.array(hri_labels, dtype='str'))
+#
+# hri_labels = ['Come Here', 'Follow Me', 'Follow Me', 'Follow Me', 'Follow Me',
+#               'Get Attention', 'Get Attention', 'Get Attention', 'Go Left', 'Go Left',
+#               'Go Right', 'Go Right', 'Standing Still', 'Standing Still', 'Standing Still',
+#               'Stop', 'Stop', 'Stop', 'Stop', 'Stop']
+# np.save('../data/hri_labels_robert.npy', np.array(hri_labels, dtype='str'))
