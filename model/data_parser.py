@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import rc
 from matplotlib.animation import FuncAnimation
+from sklearn.preprocessing import MinMaxScaler
 
 
 def keypoints_to_dict(jaad_dict):
@@ -67,7 +68,10 @@ def convert_jaad_dict_to_df(jaad_dict):
     data_y = data[['look', 'action', 'hand_gesture', 'nod']]
     data_x = data.drop(columns=['look', 'action', 'cross', 'hand_gesture', 'nod'])
     df_norm = (data_x - data_x.mean()) / (data_x.max() - data_x.min())
-    return df_norm.astype('float'), data_y.astype('float')
+    scaler = MinMaxScaler()
+    scaler.fit(data_x)
+    x_st = scaler.transform(data_x)
+    return x_st, data_y.astype('float')
 
 
 def get_JAAD_data(file_dir):

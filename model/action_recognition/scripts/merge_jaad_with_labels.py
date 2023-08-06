@@ -102,7 +102,7 @@ def merge_jaad_with_labels(data: dict, box):
 
 
 def save_data(update_data: dict, output_folder: str, filename: str):
-    path = output_folder / filename
+    path = output_folder / p_new['old_id'] / filename
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as outfile:
         json.dump(update_data, outfile)
@@ -141,7 +141,7 @@ if __name__ == "__main__":
 
     dir_jaad = Path("C:/Users/max00/Documents/PoseRecognition/pedestrian-pose-recognition/data/JAAD_output_JSON")
     path_labels = Path("C:/Users/max00/Downloads/JAAD-JAAD_2.0/JAAD-JAAD_2.0/annotations/")
-    output_folder = Path("C:/Users/max00/Documents/PoseRecognition/pedestrian-pose-recognition/data/JAAD_JSON_Labels/")
+    output_folder = Path("C:/Users/max00/Documents/PoseRecognition/pedestrian-pose-recognition/data/JAAD_per_person/")
     pedestrian_new = []
     for video_name in os.listdir(dir_jaad):
         annotation_file = path_labels / (video_name + ".xml")
