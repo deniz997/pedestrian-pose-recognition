@@ -278,6 +278,41 @@ def get_camera_stream_and_display():
     cv2.destroyAllWindows()
 
 
+def get_stream_and_display(img):
+    '''
+    This is an example function to generate and display body keypoints on a camera input stream
+    '''
+    import_op()
+    params = set_params()
+
+    # Constructing OpenPose object allocates GPU memory
+    opWrapper = op.WrapperPython()
+    opWrapper.configure(params)
+    opWrapper.start()
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
+    datum = op.Datum()
+    datum.cvInputData = img
+    opWrapper.emplaceAndPop(op.VectorDatum([datum]))
+    keypoints = datum.poseKeypoints
+    output_image = datum.cvOutputData
+
+    print(type(keypoints))
+
+    # Print the human pose keypoints, i.e., a [#people x #keypoints x 3]-dimensional numpy object with the keypoints of all the people on that image
+    if keypoints is not None and len(keypoints) > 0:
+        print('Human(s) Pose Estimated!')
+        print(keypoints)
+    else:
+        print('No humans detected!')
+
+    # Display the stream
+    cv2.putText(output_image, 'OpenPose using Python-OpenCV', (20, 30), font, 1, (255, 255, 255), 1, cv2.LINE_AA)
+
+    return output_image, keypoints
+
+
 def get_camera_keypoints():
     '''
     Call this function to get the real time keypoints of the camera input. This function is
