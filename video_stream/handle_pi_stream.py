@@ -6,8 +6,7 @@ from torch import nn
 import torch
 
 from openpose.op_utils import get_keypoints_image_from_data, get_camera_stream_and_display, get_stream_and_display
-from video_stream.ra_gcn_command_recognition import RA_GCN, labels_to_learn, Graph, Data_transform, Occlusion_part, \
-    Occlusion_time
+from video_stream.ra_gcn_command_recognition import RA_GCN, labels_to_learn, Graph, Data_transform, Occlusion_part, Occlusion_time
 
 
 def print_hi(name):
@@ -58,24 +57,34 @@ def preprocess_data(frames):
 
     DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    x = np.zeros((2, 90, 17, 1))
-    for frame in frames:
-        for i in range(17):
-            x[0, frame, i, 0] = frame[i][0]
-            x[1, frame, i, 0] = frame[i][1]
-    x = transform(x)
-    x = torch.from_numpy(x).float()
-    x = x[None, :, :, :, :]
-    x = x.to(DEVICE)
-    return x
+    labels = np.load("../data/hri_labels_robert.npy")
+    num = 12
+
+    # val_dataset = NTU('/content/drive/MyDrive/HRI_gestures/skeletons/', 'train', 0.8, (2, 90, 17, 1), transform=transform, mode='cross-person')
+
+    for example in range(len(labels)):
+        if example == 12:
+            continue
+        x = np.zeros((2, 90, 17, 1))
+        for frame in range(len(frames[example])):
+            for i in range(17):
+                x[0, frame, i, 0] = frames[example][frame][i][0]
+                x[1, frame, i, 0] = frames[example][frame][i][1]
+        x = transform(x)
+        x = torch.from_numpy(x).float()
+        x = x[None, :, :, :, :]
+        x = x.to(DEVICE)
+        return x
+
+
 if __name__ == '__main__':
     #cap = cv2.VideoCapture('http://192.168.2.206:8000/stream.mjpg')
     cap = cv2.VideoCapture(0)
-    path = ''
+    path = 'C:/Users/max00/Documents/PoseRecognition/pedestrian-pose-recognition/Models on HRI dataset/2_coord_Stop_StandingStill_FollowMe_CROSS_SUBJECT_10epoch.pth'
     #get_camera_stream_and_display()
 
+    eval_model = load_model(path)
     frames = []
-
     while True:
         ret, frame = cap.read()
         #cv2.imshow('Video', frame)
@@ -84,11 +93,11 @@ if __name__ == '__main__':
 
         #cv2.imshow('Human Pose Estimation', img)
 
-        if len(frame) < 90:
-            frame.add(key_points)
+        if len(frames) < 30:
+            frames.append(key_points)
         else:
-            eval_model = load_model(path)
-            out, _ = eval_model(key_points)
+            x = preprocess_data(frames)
+            out, _ = eval_model(x)
             pred = out.max(1, keepdim=True)[1]
             label = labels_to_learn[pred]
 
