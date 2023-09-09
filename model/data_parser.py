@@ -25,38 +25,40 @@ def keypoints_to_dict(jaad_dict):
         ret_list.append(keypoint_dict)
     return ret_list
 
+
 def map_text_to_scalar(label_type, value):
-        """
-        Maps a text label in XML file to scalars
-        :param label_type: The label type
-        :param value: The text to be mapped
-        :return: The scalar value
-        """
-        map_dic = {'occlusion': {'none': 0, 'part': 1, 'full': 2},
-                   'action': {'standing': 0, 'walking': 1},
-                   'nod': {'__undefined__': 0, 'nodding': 1},
-                   'look': {'not-looking': 0, 'looking': 1},
-                   'hand_gesture': {'__undefined__': 0, 'greet': 1, 'yield': 1,
-                                    'rightofway': 1, 'other': 1},
-                   'reaction': {'__undefined__': 0, 'clear_path': 1, 'speed_up': 2,
-                                'slow_down': 3},
-                   'cross': {'not-crossing': 0, 'crossing': 1, 'irrelevant': -1},
-                   'age': {'child': 0, 'young': 1, 'adult': 2, 'senior': 3},
-                   'designated': {'ND': 0, 'D': 1},
-                   'gender': {'n/a': 0, 'female': 1, 'male': 2},
-                   'intersection': {'no': 0, 'yes': 1},
-                   'motion_direction': {'n/a': 0, 'LAT': 1, 'LONG': 2},
-                   'traffic_direction': {'OW': 0, 'TW': 1},
-                   'signalized': {'n/a': 0, 'NS': 1, 'S': 2},
-                   'vehicle': {'stopped': 0, 'moving_slow': 1, 'moving_fast': 2,
-                               'decelerating': 3, 'accelerating': 4},
-                   'road_type': {'street': 0, 'parking_lot': 1, 'garage': 2},
-                   'traffic_light': {'n/a': 0, 'red': 1, 'green': 2}}
+    """
+    Maps a text label in XML file to scalars
+    :param label_type: The label type
+    :param value: The text to be mapped
+    :return: The scalar value
+    """
+    map_dic = {'occlusion': {'none': 0, 'part': 1, 'full': 2},
+               'action': {'standing': 0, 'walking': 1},
+               'nod': {'__undefined__': 0, 'nodding': 1},
+               'look': {'not-looking': 0, 'looking': 1},
+               'hand_gesture': {'__undefined__': 0, 'greet': 1, 'yield': 1,
+                                'rightofway': 1, 'other': 1},
+               'reaction': {'__undefined__': 0, 'clear_path': 1, 'speed_up': 2,
+                            'slow_down': 3},
+               'cross': {'not-crossing': 0, 'crossing': 1, 'irrelevant': -1},
+               'age': {'child': 0, 'young': 1, 'adult': 2, 'senior': 3},
+               'designated': {'ND': 0, 'D': 1},
+               'gender': {'n/a': 0, 'female': 1, 'male': 2},
+               'intersection': {'no': 0, 'yes': 1},
+               'motion_direction': {'n/a': 0, 'LAT': 1, 'LONG': 2},
+               'traffic_direction': {'OW': 0, 'TW': 1},
+               'signalized': {'n/a': 0, 'NS': 1, 'S': 2},
+               'vehicle': {'stopped': 0, 'moving_slow': 1, 'moving_fast': 2,
+                           'decelerating': 3, 'accelerating': 4},
+               'road_type': {'street': 0, 'parking_lot': 1, 'garage': 2},
+               'traffic_light': {'n/a': 0, 'red': 1, 'green': 2}}
 
-        if type(value) is list or label_type not in map_dic:
-            return value
+    if type(value) is list or label_type not in map_dic:
+        return value
 
-        return map_dic[label_type][value]
+    return map_dic[label_type][value]
+
 
 def convert_jaad_dict_to_df(jaad_dict):
     updated_list = []
@@ -67,14 +69,13 @@ def convert_jaad_dict_to_df(jaad_dict):
     data = pd.DataFrame(data_dict)
     data_y = data[['look', 'action', 'hand_gesture', 'nod']]
     data_x = data.drop(columns=['look', 'action', 'cross', 'hand_gesture', 'nod'])
-    df_norm = (data_x - data_x.mean()) / (data_x.max() - data_x.min())
     scaler = MinMaxScaler()
     scaler.fit(data_x)
     x_st = scaler.transform(data_x)
     return x_st, data_y.astype('float')
 
 
-def get_JAAD_data(file_dir):
+def get_jaad_data(file_dir):
     """
     Will read JSON files from the provided file directory and subdirectories and return a list of dicts
     :param file_dir: directory where to look for input JSON files
@@ -84,15 +85,15 @@ def get_JAAD_data(file_dir):
     json_list = []
 
     for dirpath, dirnames, filenames in os.walk(file_dir):
-        JAAD_list = [pos_json for pos_json in filenames if pos_json.endswith('.json')]
-        for js in JAAD_list:
+        jaad_list = [pos_json for pos_json in filenames if pos_json.endswith('.json')]
+        for js in jaad_list:
             with open(os.path.join(dirpath, js)) as json_file:
                 json_list.append(json.load(json_file))
 
     return json_list
 
 
-def get_data_TCG(file_dir: str) -> (np.ndarray, dict):
+def get_data_tcg(file_dir: str) -> (np.ndarray, dict):
     """
     Read in the TCG dataset and its annotation
     :param file_dir: directory where data and annotations from TCG are stored
@@ -106,12 +107,12 @@ def get_data_TCG(file_dir: str) -> (np.ndarray, dict):
     return tcg_data, tcg_json
 
 
-def get_data_HRI(file_dir: str) -> (np.ndarray, list):
-    '''
+def get_data_hri(file_dir: str) -> (np.ndarray, list):
+    """
     Reads in the whole HRI dataset and creates a data array and their corresponding labels
     :param file_dir: Path to root directory of HRI dataset (example: '../data/HRI_gestures')
     :return: (data, labels) -> both as np.ndarray
-    '''
+    """
     action_class = {'A001': 'Stop', 'A002': 'Go Right', 'A003': 'Go Left', 'A004': 'Come Here', 'A005': 'Follow me',
                     'A006': 'Go Away', 'A007': 'Agree', 'A008': 'Disagree', 'A009': 'Go there', 'A010': 'Get Attention',
                     'A011': 'Be Quiet', 'A012': 'Dont Know', 'A013': 'Turn Around', 'A014': 'Take This',
@@ -149,19 +150,26 @@ def get_data_HRI(file_dir: str) -> (np.ndarray, list):
     return hri_dataset, hri_labels
 
 
-def load_data_HRI(file_dir: str) -> (np.ndarray, np.ndarray):
-    '''
+def load_data_hri(file_dir: str) -> (np.ndarray, np.ndarray):
+    """
     Loads the HRI_gestures dataset from the saved .npy files
     :param file_dir: Path to the directory both files are saved
     :return: data and labels as np.ndarray
-    '''
+    """
     hri_data = np.load(file_dir + 'HRI_data.npy')
     hri_labels = np.load(file_dir + 'HRI_labels.npy')
 
     return hri_data, hri_labels
 
 
-def transform_to_HRI(keypoints):
+def transform_to_hri(keypoints):
+    """
+    Transforms keypoints retrieved by OpenPose (25-keypoints) to keypoints matching the
+    HRI gestures dataset (17 keypoints) and normalizing the data.
+    NOTE: The data is intended to work for our own recorded data, therefore the resolution is hardcoded.
+    :param keypoints:   Array with length 25 containing keypoints from OpenPose
+    :results:           Normalized keypoints matching the HRI dataset
+    """
     hri_dict = {'Nose': 0, 'LEye': 1, 'REye': 2, 'LEar': 3, 'REar': 4, 'LShoulder': 5, 'RShoulder': 6, 'LElbow': 7,
                 'RElbow': 8, 'LWrist': 9, 'RWrist': 10, 'LHip': 11, 'RHip': 12, 'LKnee': 13, 'RKnee': 14,
                 'LAnkle': 15, 'RAnkle': 16}
@@ -178,15 +186,15 @@ def transform_to_HRI(keypoints):
 
 
 def show_skeleton(skeleton, reverse=True, as_video=False, save_with_name="", frame=0):
-    ###
-    # Skeleton: (frame_count, 17, num of dimentions, e.g. 2)
-    # reverse: The plot is upside down, set it to False when the original plot is needed
-    # as_video: Generates and displays a video from the skeleton sequences
-    # save_with_name: Saves a video from the skeleton sequences with the given file name,
-    #                 ignored if as_video is set to False
-    # frame: the frame number to plot the skeleton from,
-    #         should not exceed the total frame count of the sequence
-    ###
+    """
+    :param skeleton:        (frame_count, 17, num of dimensions, e.g. 2)
+    :param reverse:         The plot is upside down, set it to False when the original plot is needed
+    :param as_video:        Generates and displays a video from the skeleton sequences
+    :param save_with_name:  Saves a video from the skeleton sequences with the given file name,
+                            ignored if as_video is set to False
+    :param frame:           the frame number to plot the skeleton from,
+                            should not exceed the total frame count of the sequence
+    """
 
     frame_count = skeleton.shape[0]  # Total frame count
     if frame_count <= frame:
@@ -238,14 +246,3 @@ def show_skeleton(skeleton, reverse=True, as_video=False, save_with_name="", fra
     else:
         update_frame(frame)
         plt.show()
-
-
-# example usage
-# data = np.load('../data/hri_keypoints_robert.npy', allow_pickle=True)
-# show_skeleton(data[0][0][None])
-#
-# hri_labels = ['Come Here', 'Follow Me', 'Follow Me', 'Follow Me', 'Follow Me',
-#               'Get Attention', 'Get Attention', 'Get Attention', 'Go Left', 'Go Left',
-#               'Go Right', 'Go Right', 'Standing Still', 'Standing Still', 'Standing Still',
-#               'Stop', 'Stop', 'Stop', 'Stop', 'Stop']
-# np.save('../data/hri_labels_robert.npy', np.array(hri_labels, dtype='str'))

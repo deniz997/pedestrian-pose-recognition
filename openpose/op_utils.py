@@ -6,9 +6,9 @@ import argparse
 
 
 def import_op():
-    '''
+    """
     This is a helper function to import the openpose library.
-    '''
+    """
     # Import Openpose (Windows/Ubuntu/OSX)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     try:
@@ -23,22 +23,26 @@ def import_op():
         else:
             # Change these variables to point to the correct folder (Release/x64 etc.)
             sys.path.append(dir_path + '/python/openpose/Release')
-            # If you run `make install` (default path is `/usr/local/python` for Ubuntu), you can also access the OpenPose/python module from there. This will install OpenPose and the python library at your desired installation path. Ensure that this is in your python path in order to use it.
+            # If you run `make install` (default path is `/usr/local/python` for Ubuntu),
+            # you can also access the OpenPose/python module from there. This will install OpenPose
+            # and the python library at your desired installation path. Ensure that this is in your
+            # python path in order to use it.
             # sys.path.append('/usr/local/python')
             global op
             from openpose import pyopenpose as op
     except ImportError as e:
         print(
-            'Error: OpenPose library could not be found. Did you enable `BUILD_PYTHON` in CMake and have this Python script in the right folder?')
+            'Error: OpenPose library could not be found. Did you enable `BUILD_PYTHON` '
+            'in CMake and have this Python script in the right folder?')
         raise e
 
 
 def get_keypoints_image(img_path: str):
-    '''
+    """
     Get the openpose keypoints of an image by the given image path
     :param img_path: Directory path to image
     :return: Array of 17 body keypoints
-    '''
+    """
     import_op()
 
     # Flags
@@ -88,11 +92,11 @@ def get_keypoints_image(img_path: str):
 
 
 def get_keypoints_image_from_data(img_data):
-    '''
+    """
     Get the body keypoints from a given image file, which was opened with OpenCV (imread())
     :param img_data: An image data file
     :return: Array of 17 body keypoints
-    '''
+    """
     import_op()
 
     # Flags
@@ -131,12 +135,12 @@ def get_keypoints_image_from_data(img_data):
 
 
 def get_keypoints_from_image_sequence(sequence, output_images=False):
-    '''
+    """
     Calculate the body keypoints from a sequence of image files
     :param sequence: Array of images, read with the OpenCV library (.imread())
     :param output_images: Set to true if the calculated output images should be returned as well
     :return: List of arrays of 17 body keypoints - if output_images is true: (keypoints, new_images)
-    '''
+    """
     import_op()
     params = set_params()
 
@@ -161,12 +165,12 @@ def get_keypoints_from_image_sequence(sequence, output_images=False):
 
 
 def get_keypoints_from_video(video_path: str, save_video=False, output_file='../data/sample_video.mp4'):
-    '''
+    """
     Get an array of body keypoints of the video given by its path
     :param video_path: Directory path to video
     :param save_video: Set to true if you want to save an output video as .mp4 file
     :return: List of arrays with body keypoints for each frame
-    '''
+    """
     import_op()
     params = set_params()
 
@@ -202,10 +206,10 @@ def get_keypoints_from_video(video_path: str, save_video=False, output_file='../
 
 
 def set_params():
-    '''
+    """
     Creates a parameter dictionary used by OpenPose
     :return: Parameter dictionary with default values
-    '''
+    """
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
     params = dict()
@@ -226,9 +230,9 @@ def set_params():
 
 
 def get_camera_stream_and_display():
-    '''
+    """
     This is an example function to generate and display body keypoints on a camera input stream
-    '''
+    """
     import_op()
     params = set_params()
 
@@ -256,7 +260,8 @@ def get_camera_stream_and_display():
 
         print(type(keypoints))
 
-        # Print the human pose keypoints, i.e., a [#people x #keypoints x 3]-dimensional numpy object with the keypoints of all the people on that image
+        # Print the human pose keypoints, i.e., a [#people x #keypoints x 3]-dimensional numpy
+        # object with the keypoints of all the people on that image
         if keypoints is not None and len(keypoints) > 0:
             print('Human(s) Pose Estimated!')
             print(keypoints)
@@ -279,9 +284,9 @@ def get_camera_stream_and_display():
 
 
 def get_stream_and_display(img):
-    '''
+    """
     This is an example function to generate and display body keypoints on a camera input stream
-    '''
+    """
     import_op()
     params = set_params()
 
@@ -314,11 +319,11 @@ def get_stream_and_display(img):
 
 
 def get_camera_keypoints():
-    '''
+    """
     Call this function to get the real time keypoints of the camera input. This function is
     very slow without a proper GPU installed.
     :return: Array of people and their body keypoints
-    '''
+    """
     import_op()
     params = set_params()
 
