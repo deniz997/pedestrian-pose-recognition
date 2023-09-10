@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 
-
+# File written by Maximilian Bartels
 def xml_to_dict(xml_string: str):
     root = ET.fromstring(xml_string)
     return element_to_dict(root)

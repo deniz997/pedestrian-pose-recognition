@@ -9,6 +9,7 @@ from matplotlib.animation import FuncAnimation
 from sklearn.preprocessing import MinMaxScaler
 
 
+# function written by Maximilian Bartels
 def keypoints_to_dict(jaad_dict):
     ret_list = []
     for data in jaad_dict:
@@ -26,6 +27,7 @@ def keypoints_to_dict(jaad_dict):
     return ret_list
 
 
+# function written by Maximilian Bartels
 def map_text_to_scalar(label_type, value):
     """
     Maps a text label in XML file to scalars
@@ -60,6 +62,7 @@ def map_text_to_scalar(label_type, value):
     return map_dic[label_type][value]
 
 
+# function written by Maximilian Bartels
 def convert_jaad_dict_to_df(jaad_dict):
     updated_list = []
     for j_dict in jaad_dict:

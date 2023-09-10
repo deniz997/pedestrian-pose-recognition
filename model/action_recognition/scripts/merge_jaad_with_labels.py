@@ -7,6 +7,7 @@ import re
 from model.action_recognition.scripts.xml_to_dict import xml_to_dict
 from pathlib import Path
 
+# File written by Maximilian Bartels
 
 def infer_frame_number(filename: str):
     pattern = r'.*_(\d{12})_.*'  # Assuming frame number is always 12 digits

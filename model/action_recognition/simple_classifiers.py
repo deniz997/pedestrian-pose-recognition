@@ -1,20 +1,40 @@
+import itertools
+
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 from keras.layers import LSTM, Dense
 from keras.models import Sequential
 from matplotlib import pyplot as plt
-from scipy import sparse
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 from tcn import TCN, tcn_full_summary
 
-from model.data_parser import convert_jaad_dict_to_df, get_JAAD_data
+from model.data_parser import convert_jaad_dict_to_df, get_jaad_data
+
+# File written by Maximilian Bartels
 
 if __name__ == '__main__':
     data_dir = "C:/Users/max00/Documents/PoseRecognition/pedestrian-pose-recognition/data/JAAD_per_person/"
 
-    X, Y = convert_jaad_dict_to_df(get_JAAD_data(data_dir))
+    handwaving = "C:/Users/max00/Documents/PoseRecognition/pedestrian-pose-recognition/data/handwaving/"
+    handclipping = "C:/Users/max00/Documents/PoseRecognition/pedestrian-pose-recognition/data/handclipping/"
 
+    drop_third_element = lambda lst: [x for i, x in enumerate(lst, start=1) if i % 3 != 0]
+    data_handwaving = [drop_third_element(list(itertools.chain.from_iterable(x))) for x in get_jaad_data(handwaving)]
+    data_clapping = [drop_third_element(list(itertools.chain.from_iterable(x))) for x in get_jaad_data(handclipping)]
+    data_hand = data_handwaving + data_clapping
+    df_hand = pd.DataFrame(data_hand)
+    scaler = MinMaxScaler()
+    scaler.fit(df_hand)
+    arr_hand = scaler.transform(df_hand)
+    label_array = np.array([1, 0, 1, 0])
+    label_df = pd.DataFrame(np.tile(label_array, (len(data_hand), 1)), columns=['look', 'action', 'hand_gesture', 'nod'])
+
+    X, Y = convert_jaad_dict_to_df(get_jaad_data(data_dir))
+    X = pd.concat([pd.DataFrame(X), pd.DataFrame(arr_hand)], ignore_index=True)
+    Y = pd.concat([Y, label_df], ignore_index=True)
     # SVM Classifier
 
     # Split the data into training and testing sets

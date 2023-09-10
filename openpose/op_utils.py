@@ -1,4 +1,6 @@
 import sys
+from pathlib import Path
+
 import cv2
 import os
 from sys import platform
@@ -15,8 +17,9 @@ def import_op():
         # Windows Import
         if platform == "win32":
             # Change these variables to point to the correct folder (Release/x64 etc.)
+            dir_path = 'C:/Users/max00/Documents/PoseRecognition/openpose/build'
             sys.path.append(dir_path + '/python/openpose/Release')
-            os.add_dll_directory(dir_path + '/Release')
+            os.add_dll_directory(dir_path + '/x64/Release')
             os.add_dll_directory(dir_path + '/bin')
             global op
             import pyopenpose as op
@@ -98,28 +101,7 @@ def get_keypoints_image_from_data(img_data):
     :return: Array of 17 body keypoints
     """
     import_op()
-
-    # Flags
-    parser = argparse.ArgumentParser()
-    args = parser.parse_known_args()
-
-    # Custom Params (refer to include/openpose/flags.hpp for more parameters)
-    params = dict()
-    params["model_folder"] = "models/"
-
-    # Add others in path?
-    for i in range(0, len(args[1])):
-        curr_item = args[1][i]
-        if i != len(args[1]) - 1:
-            next_item = args[1][i + 1]
-        else:
-            next_item = "1"
-        if "--" in curr_item and "--" in next_item:
-            key = curr_item.replace('-', '')
-            if key not in params:  params[key] = "1"
-        elif "--" in curr_item and "--" not in next_item:
-            key = curr_item.replace('-', '')
-            if key not in params: params[key] = next_item
+    params = set_params()
 
     # Starting OpenPose
     opWrapper = op.WrapperPython()
@@ -211,7 +193,8 @@ def set_params():
     :return: Parameter dictionary with default values
     """
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    #dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = 'C:/Users/max00/Documents/PoseRecognition/openpose/build'
     params = dict()
     params["logging_level"] = 3
     params["output_resolution"] = "-1x-1"

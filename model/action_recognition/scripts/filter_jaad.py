@@ -4,6 +4,7 @@ import os
 from model.action_recognition.scripts.merge_jaad_with_labels import read_xml_file, get_pedestrians_from_dict
 from model.action_recognition.scripts.xml_to_dict import xml_to_dict
 
+# File written by Maximilian Bartels
 
 def get_single_pedestrians_from_annotations():
     dir_jaad = "C:/Users/max00/Downloads/JAAD-JAAD_2.0/JAAD-JAAD_2.0/annotations/"
