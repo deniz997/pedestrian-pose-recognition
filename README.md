@@ -1,3 +1,6 @@
+# This work was done for the course Applications of Robotics and Autonomous Systems at the TU Berlin SS23.
+For more information please refer to [the paper](https://github.com/deniz997/pedestrian-pose-recognition/blob/main/APPRAS_report.pdf).
+
 # Information About Data Input
 
 ## OpenPose
